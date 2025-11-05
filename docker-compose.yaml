@@ -1,0 +1,56 @@
+version: '3.8'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+  order-service:
+    build: ./OrderService
+    ports:
+      - "8000:8000"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq
+      - MERCHANT_SERVICE_URL=http://merchant-service:8001
+      - BUYER_SERVICE_URL=http://buyer-service:8002
+      - INVENTORY_SERVICE_URL=http://inventory-service:8003
+
+  merchant-service:
+    build: ./MerchantService
+    ports:
+      - "8001:8001"
+
+  buyer-service:
+    build: ./BuyerService
+    ports:
+      - "8002:8002"
+
+  inventory-service:
+    build: ./InventoryService
+    ports:
+      - "8003:8003"
+
+  payment-service:
+    build: ./PaymentService
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq
+
+  email-service:
+    build: ./EmailService
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq
