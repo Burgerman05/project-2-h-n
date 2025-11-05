@@ -93,6 +93,29 @@ def create_product(product: ProductCreate):
     
     return {"id": product_id}
 
+
+@app.post("/create-test-products")
+def create_test_products():
+    """Temporary endpoint to create test products with integer IDs"""
+    conn = sqlite3.connect('inventory.db')
+    cursor = conn.cursor()
+
+    test_products = [
+        (1, "Test Product 123", 49.99, 100),
+        (1, "Test Product 456", 29.99, 50),
+        (1, "Test Product 789", 9.99, 200)
+    ]
+    
+    for merchant_id, name, price, quantity in test_products:
+        cursor.execute('''
+            INSERT INTO products (merchantId, productName, price, quantity, reserved)
+            VALUES (?, ?, ?, ?, 0)
+        ''', (merchant_id, name, price, quantity))
+    
+    conn.commit()
+    conn.close()
+    return {"message": "Test products created with IDs 1, 2, 3"}
+
 @app.get("/products/{product_id}")
 def get_product(product_id: int):
     conn = sqlite3.connect('inventory.db')
@@ -143,6 +166,29 @@ def reserve_product(product_id: int):
     conn.close()
     
     return {"success": success, "message": "Product reserved" if success else "Reservation failed"}
+
+@app.post("/products", status_code=201)
+def create_product(product: ProductCreate):
+    conn = sqlite3.connect('inventory.db')
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        INSERT INTO products (merchantId, productName, price, quantity, reserved)
+        VALUES (?, ?, ?, ?, 0)
+    ''', (
+        product.merchantId,
+        product.productName,
+        product.price,
+        product.quantity
+    ))
+    
+    product_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    
+    return {"id": product_id}
+
+
 
 @app.get("/health")
 def health_check():

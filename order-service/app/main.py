@@ -145,16 +145,21 @@ def create_order(order: OrderCreate):
     conn.commit()
     conn.close()
     
-    order_data = {
-        "id": order_id,
-        "productId": order.productId,
-        "merchantId": order.merchantId,
-        "buyerId": order.buyerId,
-        "creditCard": order.creditCard.dict(),
-        "discount": order.discount or 0.0
-    }
-
-    rabbitmq_client.publish_order_created(order_data)
+    # Try to publish RabbitMQ event, but don't fail if it doesn't work
+    try:
+        order_data = {
+            "id": order_id,
+            "productId": order.productId,
+            "merchantId": order.merchantId,
+            "buyerId": order.buyerId,
+            "creditCard": order.creditCard.dict(),
+            "discount": order.discount or 0.0
+        }
+        rabbitmq_client.publish_order_created(order_data)
+        print(f"✅ Order {order_id} created and event published")
+    except Exception as e:
+        print(f"⚠️ Order {order_id} created but RabbitMQ event failed: {e}")
+        # Don't raise the exception - order was successfully created
     
     return {"id": order_id}
 

@@ -12,7 +12,7 @@ services:
       retries: 3
 
   order-service:
-    build: ./OrderService
+    build: ./order-service
     ports:
       - "8000:8000"
     depends_on:
@@ -25,22 +25,22 @@ services:
       - INVENTORY_SERVICE_URL=http://inventory-service:8003
 
   merchant-service:
-    build: ./MerchantService
+    build: ./merchant-service
     ports:
       - "8001:8001"
 
   buyer-service:
-    build: ./BuyerService
+    build: ./buyer-service
     ports:
       - "8002:8002"
 
   inventory-service:
-    build: ./InventoryService
+    build: ./inventory-service
     ports:
       - "8003:8003"
 
   payment-service:
-    build: ./PaymentService
+    build: ./payment-service
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -48,7 +48,7 @@ services:
       - RABBITMQ_URL=amqp://rabbitmq
 
   email-service:
-    build: ./EmailService
+    build: ./email-service
     depends_on:
       rabbitmq:
         condition: service_healthy
