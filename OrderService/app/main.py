@@ -157,9 +157,9 @@ def create_order(order: OrderCreate):
             "discount": order.discount or 0.0
         }
         rabbitmq_client.publish_order_created(order_data)
-        print(f"✅ Order {order_id} created and event published")
+        print(f"Order {order_id} created and event published")
     except Exception as e:
-        print(f"⚠️ Order {order_id} created but RabbitMQ event failed: {e}")
+        print(f"Order {order_id} created but RabbitMQ event failed: {e}")
         # Don't raise the exception - order was successfully created
     
     return {"id": order_id}
