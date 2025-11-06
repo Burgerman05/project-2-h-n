@@ -121,8 +121,9 @@ def create_order(order: OrderCreate):
         if not check_merchant_allows_discount(order.merchantId):
             raise HTTPException(status_code=400, detail="Merchant does not allow discount")
     
-    # gaymir vöru
-    if not reserve_product(order.productId):
+    # geymir vöru
+    reservation_response = requests.post(f"{INVENTORY_SERVICE_URL}/products/{order.productId}/reserve")
+    if not (reservation_response.status_code == 200 and reservation_response.json().get('success')):
         raise HTTPException(status_code=400, detail="Product is sold out")
     
     # býr til order í db

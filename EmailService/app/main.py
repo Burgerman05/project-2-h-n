@@ -1,6 +1,7 @@
 import pika
 import json
 import os
+import requests
 import time
 from dotenv import load_dotenv
 
@@ -40,9 +41,21 @@ def send_email(to_email, subject, body):
     #     print(f"SendGrid Error: {e}")
 
 def get_buyer_email(buyer_id):
+    try:
+        response = requests.get(f"http://buyer-service:8002/buyers/{buyer_id}")
+        if response.status_code == 200:
+            return response.json().get('email')
+    except:
+        pass
     return f"buyer{buyer_id}@example.com"
 
-def get_merchant_email(merchant_id): 
+def get_merchant_email(merchant_id):
+    try:
+        response = requests.get(f"http://merchant-service:8001/merchants/{merchant_id}")
+        if response.status_code == 200:
+            return response.json().get('email')
+    except:
+        pass
     return f"merchant{merchant_id}@example.com"
 
 def get_product_name(product_id):

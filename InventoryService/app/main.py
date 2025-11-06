@@ -167,29 +167,6 @@ def reserve_product(product_id: int):
     
     return {"success": success, "message": "Product reserved" if success else "Reservation failed"}
 
-@app.post("/products", status_code=201)
-def create_product(product: ProductCreate):
-    conn = sqlite3.connect('inventory.db')
-    cursor = conn.cursor()
-    
-    cursor.execute('''
-        INSERT INTO products (merchantId, productName, price, quantity, reserved)
-        VALUES (?, ?, ?, ?, 0)
-    ''', (
-        product.merchantId,
-        product.productName,
-        product.price,
-        product.quantity
-    ))
-    
-    product_id = cursor.lastrowid
-    conn.commit()
-    conn.close()
-    
-    return {"id": product_id}
-
-
-
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
