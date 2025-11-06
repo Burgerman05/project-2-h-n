@@ -27,8 +27,8 @@ def init_db():
 
 init_db()
 
+#Honldar payment Success og failure events
 def handle_payment_event(event_data, payment_success: bool):
-    """Handle payment success/failure events"""
     product_id = event_data.get('productId')
     
     conn = sqlite3.connect('inventory.db')
@@ -49,7 +49,7 @@ def handle_payment_event(event_data, payment_success: bool):
     
     conn.commit()
     conn.close()
-    print(f"✅ Updated inventory for product {product_id} - payment {'success' if payment_success else 'failed'}")
+    print(f"Updated inventory for product {product_id} - payment {'success' if payment_success else 'failed'}")
 
 def start_rabbitmq_consumer():
     rabbitmq = RabbitMQClient()
@@ -57,7 +57,7 @@ def start_rabbitmq_consumer():
     def callback(ch, method, properties, body):
         try:
             event_data = json.loads(body)
-            print(f"📨 InventoryService received {method.routing_key} event")
+            print(f"InventoryService received {method.routing_key} event")
             
             if method.routing_key == 'payment_success':
                 handle_payment_event(event_data, payment_success=True)
@@ -65,7 +65,7 @@ def start_rabbitmq_consumer():
                 handle_payment_event(event_data, payment_success=False)
                 
         except Exception as e:
-            print(f"❌ Error processing payment event: {e}")
+            print(f"Error processing payment event: {e}")
     
     rabbitmq.start_consuming(callback)
 
@@ -93,10 +93,9 @@ def create_product(product: ProductCreate):
     
     return {"id": product_id}
 
-
+#temp endpoint
 @app.post("/create-test-products")
 def create_test_products():
-    """Temporary endpoint to create test products with integer IDs"""
     conn = sqlite3.connect('inventory.db')
     cursor = conn.cursor()
 
