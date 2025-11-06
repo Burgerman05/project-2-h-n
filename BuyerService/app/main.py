@@ -45,7 +45,7 @@ def create_buyer(buyer: BuyerCreate):
     conn.close()
     
     return {"id": buyer_id}
-
+#vistar i gagnagrun
 @app.get("/buyers/{buyer_id}")
 def get_buyer(buyer_id: int):
     conn = sqlite3.connect('buyers.db')
