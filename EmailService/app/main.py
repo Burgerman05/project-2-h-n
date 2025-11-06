@@ -8,37 +8,18 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# For demo purposes - in production use SendGrid
 # SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
 # SENDGRID_SENDER_EMAIL = os.getenv('SENDGRID_SENDER_EMAIL')
 
 def send_email(to_email, subject, body):
-    """
-    Simplified email function - prints to console for demo
-    In production, replace with SendGrid code
-    """
     print("=" * 50)
-    print(f"📧 EMAIL SENT:")
+    print(f"EMAIL SENT:")
     print(f"To: {to_email}")
     print(f"Subject: {subject}")
     print(f"Body: {body}")
     print(f"Timestamp: {time.strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 50)
     
-    # Uncomment for actual SendGrid integration:
-    # from sendgrid import SendGridAPIClient
-    # from sendgrid.helpers.mail import Mail
-    # message = Mail(
-    #     from_email=SENDGRID_SENDER_EMAIL,
-    #     to_emails=to_email,
-    #     subject=subject,
-    #     html_content=body)
-    # try:
-    #     sg = SendGridAPIClient(SENDGRID_API_KEY)
-    #     response = sg.send(message)
-    #     print(f"SendGrid Response: {response.status_code}")
-    # except Exception as e:
-    #     print(f"SendGrid Error: {e}")
 
 def get_buyer_email(buyer_id):
     try:
@@ -60,7 +41,7 @@ def get_merchant_email(merchant_id):
 
 def get_product_name(product_id):
     return f"Product {product_id}"
-
+#hölndlar order created
 def handle_order_created(event_data):
     order_id = event_data.get('id')
     buyer_id = event_data.get('buyerId')
@@ -79,9 +60,8 @@ def handle_order_created(event_data):
     send_email(buyer_email, subject, body)
     # Send to seljanda
     send_email(merchant_email, subject, body)
-
+#höndlar payment success
 def handle_payment_success(event_data):
-    """Handle payment_success event"""
     order_id = event_data.get('id')
     buyer_id = event_data.get('buyerId')
     merchant_id = event_data.get('merchantId')
@@ -96,9 +76,8 @@ def handle_payment_success(event_data):
     send_email(buyer_email, subject, body)
     # Sendir til seljanda
     send_email(merchant_email, subject, body)
-
+#höndlar payment failure
 def handle_payment_failure(event_data):
-    """Handle payment_failed event"""
     order_id = event_data.get('id')
     buyer_id = event_data.get('buyerId')
     merchant_id = event_data.get('merchantId')
@@ -115,8 +94,7 @@ def handle_payment_failure(event_data):
     send_email(merchant_email, subject, body)
 
 def start_consuming():
-    """Start consuming RabbitMQ events"""
-    print("🚀 Starting EmailService...")
+    print("Starting EmailService...")
     
     while True:
         try:
@@ -133,7 +111,7 @@ def start_consuming():
             for queue in queues:
                 channel.queue_declare(queue=queue)
             
-            print("✅ Connected to RabbitMQ. Waiting for events...")
+            print("Connected to RabbitMQ. Waiting for events...")
             
             def callback(ch, method, properties, body):
                 try:
@@ -148,10 +126,10 @@ def start_consuming():
                     elif method.routing_key == 'payment_failed':
                         handle_payment_failure(event_data)
                     
-                    print(f"✅ Processed event from {method.routing_key}")
+                    print(f"Processed event from {method.routing_key}")
                     
                 except Exception as e:
-                    print(f"❌ Error processing event: {e}")
+                    print(f"Error processing event: {e}")
             
             # tekur frá öllum queues
             for queue in queues:
@@ -162,15 +140,15 @@ def start_consuming():
                 )
             
             channel.start_consuming()
-            
+        #error handnling    
         except pika.exceptions.AMQPConnectionError:
-            print("❌ Cannot connect to RabbitMQ. Retrying in 5 seconds...")
+            print("Cannot connect to RabbitMQ. Retrying in 5 seconds...")
             time.sleep(5)
         except KeyboardInterrupt:
-            print("🛑 EmailService stopped by user")
+            print("EmailService stopped by user")
             break
         except Exception as e:
-            print(f"❌ Unexpected error: {e}. Restarting in 5 seconds...")
+            print(f"Unexpected error: {e}. Restarting in 5 seconds...")
             time.sleep(5)
 
 if __name__ == "__main__":
