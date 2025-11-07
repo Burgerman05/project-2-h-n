@@ -5,7 +5,7 @@
 
 ### Installation and run
    git clone https://github.com/Burgerman05/project-2-h-n.git
-   cd {Birgir24@ru.is}-{enok24@ru.is}-project2
+   cd project-2-h-n-main
 
    
 
